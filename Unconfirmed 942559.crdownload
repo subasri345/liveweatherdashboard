@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Weather Dashboard</title>
+<style>
+/* General Styles */
+body {
+  margin: 0;
+  font-family: 'Segoe UI', sans-serif;
+  text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 50px 20px;
+  transition: background 1s ease;
+  background: linear-gradient(to right, #6a11cb, #2575fc);
+  color: white;
+}
+
+/* Heading */
+h1 {
+  margin-bottom: 30px;
+  font-size: 2.5em;
+  text-shadow: 1px 1px 6px rgba(0,0,0,0.4);
+}
+
+/* Input and Button */
+input {
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  width: 250px;
+  font-size: 1em;
+  margin-right: 10px;
+  transition: 0.3s;
+}
+input:focus {
+  box-shadow: 0 0 10px rgba(255,255,255,0.5);
+}
+
+button {
+  padding: 12px 20px;
+  border-radius: 10px;
+  border: none;
+  cursor: pointer;
+  background: #ff4d6d;
+  color: white;
+  font-weight: bold;
+  font-size: 1em;
+  transition: 0.3s;
+}
+button:hover {
+  background: #ff1a3c;
+  transform: scale(1.05);
+}
+
+/* Weather Card */
+.weather-card {
+  margin-top: 30px;
+  padding: 25px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(15px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  max-width: 350px;
+  width: 100%;
+  transition: 0.5s;
+}
+.weather-card h2 {
+  margin: 0;
+  font-size: 1.8em;
+  margin-bottom: 10px;
+}
+.weather-card p {
+  margin: 5px 0;
+  font-size: 1.1em;
+}
+.weather-card img {
+  width: 80px;
+  height: 80px;
+}
+
+/* Dynamic background colors */
+.sunny { background: linear-gradient(to right, #fddb92, #d1fdff); color: #333; }
+.cloudy { background: linear-gradient(to right, #bdc3c7, #2c3e50); }
+.rainy { background: linear-gradient(to right, #00c6fb, #005bea); }
+.snowy { background: linear-gradient(to right, #e6f0ff, #99ccff); color: #333; }
+
+/* Responsive */
+@media (max-width: 400px) {
+  input { width: 70%; margin-bottom: 10px; }
+  button { width: 50%; }
+  .weather-card { padding: 20px; }
+}
+</style>
+</head>
+<body>
+
+<h1>🌤️ Weather Dashboard</h1>
+<div>
+  <input type="text" id="city" placeholder="Enter city">
+  <button onclick="getWeather()">Get Weather</button>
+</div>
+
+<div class="weather-card" id="weather"></div>
+
+<script>
+const API_KEY = 'a4ec41f51e560f657cfe107af13fe1a8';
+
+async function getWeather() {
+  const city = document.getElementById('city').value;
+  if (!city) return;
+
+  const res = await fetch(`https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${API_KEY}`);
+  const data = await res.json();
+
+  if (data.cod !== 200) {
+    document.getElementById('weather').innerHTML = '<p>City not found!</p>';
+    document.body.className = '';
+    return;
+  }
+
+  // Set dynamic background based on weather
+  const condition = data.weather[0].main.toLowerCase();
+  if (condition.includes('cloud')) document.body.className = 'cloudy';
+  else if (condition.includes('rain') || condition.includes('drizzle')) document.body.className = 'rainy';
+  else if (condition.includes('snow')) document.body.className = 'snowy';
+  else if (condition.includes('clear')) document.body.className = 'sunny';
+  else document.body.className = '';
+
+  // Display weather
+  document.getElementById('weather').innerHTML = `
+    <h2>${data.name}, ${data.sys.country}</h2>
+    <p>Temperature: ${Math.round(data.main.temp)}°C</p>
+    <p>Condition: ${data.weather[0].main}</p>
+    <img src="https://openweathermap.org/img/wn/${data.weather[0].icon}@2x.png" alt="weather icon">
+    <p>Humidity: ${data.main.humidity}%</p>
+    <p>Wind: ${data.wind.speed} m/s</p>
+  `;
+}
+</script>
+
+</body>
+</html>
